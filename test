@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JROS 主线任务布局预览</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090a0d;
+      --panel: #111318;
+      --panel-strong: #171a20;
+      --line: #2a2e37;
+      --text: #f2f3f5;
+      --muted: #9298a5;
+      --accent: #ff4d45;
+      --success: #6fe0a5;
+      --shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 36px 24px;
+      background:
+        radial-gradient(circle at 57% -18%, rgba(255, 77, 69, 0.19), transparent 36%),
+        linear-gradient(180deg, #0b0c10 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: Inter, "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    }
+
+    button, input, textarea { font: inherit; }
+
+    .workspace {
+      width: min(1280px, 100%);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 18px 402px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .brand { color: var(--text); font-weight: 800; }
+
+    .local-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .local-badge::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      content: "";
+      box-shadow: 0 0 14px rgba(111, 224, 165, .6);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 720px;
+      gap: 42px;
+      align-items: start;
+      justify-content: center;
+    }
+
+    .sidebar {
+      display: grid;
+      gap: 18px;
+    }
+
+    .task-card,
+    .main-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(17, 19, 24, .95);
+      box-shadow: var(--shadow);
+    }
+
+    .focus-card {
+      position: relative;
+      border: 2px solid #ff4d45;
+      animation: redBreathingBorder 2s ease-in-out infinite;
+    }
+
+    .focus-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .focus-card:focus-within {
+      animation-duration: 2.6s;
+    }
+
+    @keyframes redBreathingBorder {
+      0%, 100% {
+        border-color: #ff4d45;
+        box-shadow:
+          0 28px 90px rgba(0, 0, 0, .45),
+          0 0 0 2px #ff4d45,
+          0 0 18px rgba(255, 77, 69, .22);
+      }
+      50% {
+        border-color: #ff4d45;
+        box-shadow:
+          0 28px 90px rgba(0, 0, 0, .45),
+          0 0 0 6px #ff4d45,
+          0 0 46px rgba(255, 77, 69, .62);
+      }
+    }
+
+    .task-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 21px 22px 17px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .task-kicker {
+      margin: 0 0 7px;
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .task-header h2 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: -.03em;
+    }
+
+    .limit {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .task-grid {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+    }
+
+    .task-grid > * {
+      min-height: 68px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .task-grid > :nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+
+    .task-key {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--line);
+      background: #0d0f13;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .week .task-key {
+      color: #ff9b96;
+    }
+
+    .task-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 0;
+      outline: 0;
+      background: var(--panel-strong);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .task-input::placeholder { color: #69707c; }
+    .task-input:focus { background: #1d2027; box-shadow: inset 3px 0 var(--accent); }
+
+    .task-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .save-button {
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-strong);
+      color: var(--text);
+      cursor: default;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .save-status {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .hero {
+      padding: 34px 34px 25px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 58px;
+      line-height: 1;
+      letter-spacing: -.06em;
+    }
+
+    .definition {
+      max-width: 560px;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .form {
+      display: grid;
+      gap: 24px;
+      padding: 30px 34px 34px;
+    }
+
+    .field { display: grid; gap: 9px; }
+    .field-head { display: flex; justify-content: space-between; gap: 14px; }
+    label { font-size: 15px; font-weight: 750; }
+    .hint { color: var(--muted); font-size: 12px; }
+
+    .main-input,
+    .main-textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      outline: none;
+      background: var(--panel-strong);
+      color: var(--text);
+    }
+
+    .main-input { height: 52px; padding: 0 15px; }
+    .main-textarea { min-height: 118px; padding: 14px 15px; resize: none; }
+
+    .main-input::placeholder,
+    .main-textarea::placeholder { color: #666d79; }
+
+    .primary {
+      width: 100%;
+      min-height: 58px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 850;
+      letter-spacing: .02em;
+      box-shadow: 0 12px 30px rgba(255, 77, 69, .22);
+    }
+
+    .message {
+      margin: -10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .main-footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 17px 4px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .annotation {
+      margin: 18px 0 0;
+      padding: 12px 15px;
+      border: 1px dashed #343945;
+      border-radius: 11px;
+      color: #7d8490;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1160px) {
+      .topbar { margin-left: 0; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="workspace">
+    <div class="topbar">
+      <div><span class="brand">JROS</span> / MAINLINE</div>
+      <div class="local-badge">仅保存在本机</div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="task-card month">
+          <header class="task-header">
+            <div>
+              <p class="task-kicker">Monthly Mainline</p>
+              <h2>本月主线任务</h2>
+            </div>
+            <span class="limit">只能有 3 项</span>
+          </header>
+          <div class="task-grid">
+            <div class="task-key">01</div>
+            <input class="task-input" data-scope="month" data-slot="1" value="完成 JROS Stream Deck v1" aria-label="本月主线任务 1">
+            <div class="task-key">02</div>
+            <input class="task-input" data-scope="month" data-slot="2" placeholder="输入第二项本月主线" aria-label="本月主线任务 2">
+            <div class="task-key">03</div>
+            <input class="task-input" data-scope="month" data-slot="3" placeholder="输入第三项本月主线" aria-label="本月主线任务 3">
+          </div>
+          <footer class="task-footer">
+            <span class="save-status" id="task-save-status">保存至：主线任务.csv</span>
+            <button class="save-button js-save-mainline-tasks">保存主线任务</button>
+          </footer>
+        </section>
+
+        <section class="task-card week">
+          <header class="task-header">
+            <div>
+              <p class="task-kicker">Weekly Steps</p>
+              <h2>本周主线任务</h2>
+            </div>
+            <span class="limit">只能有 3 项</span>
+          </header>
+          <div class="task-grid">
+            <div class="task-key">对应<br>月 01</div>
+            <input class="task-input" data-scope="week" data-slot="1" data-parent-slot="1" value="完成左侧主线任务模块样式" aria-label="本周主线任务 1">
+            <div class="task-key">对应<br>月 01</div>
+            <input class="task-input" data-scope="week" data-slot="2" data-parent-slot="1" placeholder="输入本月主线的一个步骤" aria-label="本周主线任务 2">
+            <div class="task-key">对应<br>月 02</div>
+            <input class="task-input" data-scope="week" data-slot="3" data-parent-slot="2" placeholder="输入本月主线的一个步骤" aria-label="本周主线任务 3">
+          </div>
+          <footer class="task-footer">
+            <span>每项必须对应一项本月主线</span>
+            <button class="save-button js-save-mainline-tasks">保存本周任务</button>
+          </footer>
+        </section>
+      </aside>
+
+      <section>
+        <article class="main-card focus-card">
+          <header class="hero">
+            <p class="eyebrow">2026年6月5日周五</p>
+            <h1>回到主线</h1>
+            <p class="definition">当你意识到自己没有在做应该做的事时，按下它。它只负责把混乱压缩成一个下一步动作。</p>
+          </header>
+          <div class="form">
+            <div class="field">
+              <div class="field-head">
+                <label>今天唯一主线</label>
+                <span class="hint">当天自动记住</span>
+              </div>
+              <input class="main-input" placeholder="例如：完成 JROS 回到主线按钮 v0.1">
+            </div>
+            <div class="field">
+              <div class="field-head">
+                <label>你为什么按下这个按钮？</label>
+                <span class="hint">只写事实，一句话</span>
+              </div>
+              <textarea class="main-textarea" placeholder="例如：我一直在整理想法，没有开始做页面。"></textarea>
+            </div>
+            <button class="primary">压缩成 5 分钟动作并打开 AI</button>
+            <p class="message">快捷键：Ctrl + Enter</p>
+          </div>
+        </article>
+        <footer class="main-footer">
+          <span>今天尚未记录回归事件</span>
+          <span>导出回到主线记录 CSV</span>
+        </footer>
+        <div class="annotation">
+          布局预览：右侧“回到主线”模块不改动；左侧只承担月度与周度方向校准。周任务通过“对应月 01 / 02 / 03”明确归属关系。
+        </div>
+      </section>
+    </div>
+  </main>
+  <script>
+    (() => {
+      const STORAGE_KEY = "jros.mainlineTasks.v1";
+      const CSV_FILENAME = "主线任务.csv";
+      const inputs = Array.from(document.querySelectorAll(".task-input[data-scope]"));
+      const saveButtons = Array.from(document.querySelectorAll(".js-save-mainline-tasks"));
+      const saveStatus = document.querySelector("#task-save-status");
+
+      restoreTasks();
+      inputs.forEach((input) => input.addEventListener("input", saveToLocalStorage));
+      saveButtons.forEach((button) => button.addEventListener("click", saveTasks));
+
+      function collectTasks() {
+        const savedAt = formatDateTime(new Date());
+        return inputs.map((input) => ({
+          saved_at: savedAt,
+          scope: input.dataset.scope,
+          slot: input.dataset.slot,
+          parent_slot: input.dataset.parentSlot ? `month-${input.dataset.parentSlot}` : "",
+          task: input.value.trim()
+        }));
+      }
+
+      function restoreTasks() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved) return;
+
+          inputs.forEach((input) => {
+            const key = `${input.dataset.scope}-${input.dataset.slot}`;
+            if (Object.prototype.hasOwnProperty.call(saved, key)) {
+              input.value = saved[key];
+            }
+          });
+          setStatus("已从上次保存恢复");
+        } catch (_) {
+          setStatus("本地恢复失败，请重新保存");
+        }
+      }
+
+      function saveToLocalStorage() {
+        const data = {};
+        inputs.forEach((input) => {
+          data[`${input.dataset.scope}-${input.dataset.slot}`] = input.value;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      async function saveTasks() {
+        saveToLocalStorage();
+        const rows = collectTasks();
+        const csv = buildCsv(rows);
+
+        if (await writeCsvWithPicker(csv)) {
+          setStatus(`已保存到 ${CSV_FILENAME}`);
+          return;
+        }
+
+        downloadCsv(csv);
+        setStatus(`已生成 ${CSV_FILENAME}`);
+      }
+
+      async function writeCsvWithPicker(csv) {
+        if (!window.showSaveFilePicker) return false;
+
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: CSV_FILENAME,
+            types: [{
+              description: "CSV file",
+              accept: { "text/csv": [".csv"] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(csv);
+          await writable.close();
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function downloadCsv(csv) {
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = CSV_FILENAME;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function buildCsv(rows) {
+        const header = ["saved_at", "scope", "slot", "parent_slot", "task"];
+        return "\uFEFF" + [
+          header,
+          ...rows.map((row) => header.map((key) => csvEscape(row[key])))
+        ].map((row) => row.join(",")).join("\r\n");
+      }
+
+      function csvEscape(value) {
+        return `"${String(value ?? "").replaceAll('"', '""')}"`;
+      }
+
+      function setStatus(text) {
+        if (saveStatus) saveStatus.textContent = text;
+      }
+
+      function formatDateTime(date) {
+        const pad = (value) => String(value).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+    })();
+  </script>
+</body>
+</html>
